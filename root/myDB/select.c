@@ -135,8 +135,10 @@ int main()
     {
         fprintf(stderr, "read head 113\n");
     }
+    char header[256] = {0};
+    /* sprintf(header, "HTTP/1.1 200 OK\nsetCookie: %s\n\n", name); */
+    /* printf("%s",header); */
     printf("%s", tmp_buf);
-    /* write(0, tmp_buf, strlen(tmp_buf)); */
     // 打印出中间部分
     printf("<li class=\"sigi\"><a data-toggle=\"modal\" data-target=\"#myModal4\" >:%s</a></li>", name);
     // 清空
@@ -148,7 +150,6 @@ int main()
         fprintf(stderr, "read mid 124\n");
     }
     printf("%s", tmp_buf);
-    /* write(0, tmp_buf, strlen(tmp_buf)); */
 
     free(tmp_buf);
 

@@ -43,6 +43,7 @@ static int GetQueryString(char output[])
         }
         output[i] = '\0';
     }
+
     return 0;
 }
 

@@ -79,13 +79,14 @@ long long FileSize(char* file_path)
     return st.st_size;
 }
 
+// 判断是否为目录文件
 int Is_Dir(const char* file_path)
 {
     struct stat st;
     int ret = stat(file_path, &st);
     if (ret < 0)
     {
-        perror("stat error 88");
+        perror("stat error 88 http_server.c");
         return 0;
     }
     if (S_ISDIR(st.st_mode))
@@ -125,8 +126,6 @@ int StaticPage(int sock, FirstLine* first)
         perror("open error");
         return -1;
     }
-    /* const char* first_line = "HTTP/1.1 200 OK\n"; */
-    /* const char* content_type = "text/html\n"; */
     char response[SIZE] = {0};
     sprintf(response, "HTTP/1.1 200 OK\nConten-Length: %llu\n\n", size);
     send(sock, response, strlen(response), 0);
@@ -151,7 +150,7 @@ int FatherProcess(int sock, FirstLine* first, Header* header, int father_read, i
     // 在管道中，当所有的写端关闭，这时候就会读到EOF
     // 所以要进行fork后要进行关闭没用的文件描述符
     wait(NULL);
-    char *buffer = (char*)malloc(sizeof(char) * SIZE * 10);
+    char *buffer = (char*)malloc(sizeof(char) * SIZE * 30);
     size_t count = 0;
     // 从子进程中读取响应的body
     char c = '\0';
@@ -161,6 +160,7 @@ int FatherProcess(int sock, FirstLine* first, Header* header, int father_read, i
         ++count;
     }
     char response[SIZE] = {0};
+    // 构造响应
     sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %lu\n\n", count);
     send(sock, response, strlen(response), 0);
     // 这里是不能sendfile
@@ -190,6 +190,10 @@ int ChildProcess(FirstLine* first, Header* header, int child_read, int child_wri
         sprintf(content_length_env, "CONTENT_LENGTH=%llu", header->content_length);
         putenv(content_length_env);
     }
+    // 这里是设置cookie 有字段就设置进去，没有就设置NULL
+    char cookie[SIZE] = {0};
+    sprintf(cookie, "HTTP_COOKIE=%s", header->cookie);
+    putenv(cookie);
     // 重定向标准输入和标准输出
     dup2(child_read, 0);
     dup2(child_write, 1);
@@ -316,7 +320,7 @@ void Error404(int sock)
     int sta = stat("./root/404/404.html", &st);
     if (sta < 0)
     {
-        perror("stat error1111");
+        perror("stat error318");
         return;
     }
     sprintf(buf, "HTTP/1.1 404 Not Found\nContent-Length: %lu\n\n", st.st_size);
@@ -375,6 +379,7 @@ int GetMethodUrlVer(FirstLine* first, char first_line[])
     return 0;
 }
 
+// 处理header
 int ParseHeader(FirstLine* first, Header* header)
 {
     // 此处用hash是比较好的
@@ -394,18 +399,18 @@ int ParseHeader(FirstLine* first, Header* header)
             *cur = '\n';
         }
     }
-    /* char* cookie = strstr(header->header, "Cookie: "); */
-    /* if (cookie != NULL) */
-    /* { */
-    /*     cookie += strlen("Cookie: "); */
-    /*     char* cur = cookie; */
-    /*     while (*cur != '\n') */
-    /*     { */
-    /*         ++cur; */
-    /*     } */
-    /*     *cur = '\0'; */
-    /*     header->cookie = cookie; */
-    /* } */
+    char* cookie = strstr(header->header, "Cookie: ");
+    if (cookie != NULL)
+    {
+        cookie += strlen("Cookie: ");
+        char* cur = cookie;
+        while (*cur != '\n')
+        {
+            ++cur;
+        }
+        *cur = '\0';
+        header->cookie = cookie;
+    }
     return 0;
 }
 
