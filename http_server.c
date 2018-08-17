@@ -161,8 +161,11 @@ int FatherProcess(int sock, FirstLine* first, Header* header, int father_read, i
     }
     char response[SIZE] = {0};
     // 构造响应
-    sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %lu\n\n", count);
-    send(sock, response, strlen(response), 0);
+    if (strcmp(first->url_path, "/myDB/select") != 0)
+    {
+        sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %lu\n\n", count);
+        send(sock, response, strlen(response), 0);
+    }
     // 这里是不能sendfile
     send(sock, buffer, count, 0);
     // 进程等待

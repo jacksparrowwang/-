@@ -136,8 +136,8 @@ int main()
         fprintf(stderr, "read head 113\n");
     }
     char header[256] = {0};
-    /* sprintf(header, "HTTP/1.1 200 OK\nsetCookie: %s\n\n", name); */
-    /* printf("%s",header); */
+    sprintf(header, "HTTP/1.1 200 OK\nSet-Cookie: %s\n\n", name);
+    printf("%s",header);
     printf("%s", tmp_buf);
     // 打印出中间部分
     printf("<li class=\"sigi\"><a data-toggle=\"modal\" data-target=\"#myModal4\" >:%s</a></li>", name);

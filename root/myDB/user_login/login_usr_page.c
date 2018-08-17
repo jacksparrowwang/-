@@ -13,7 +13,7 @@ int main()
     }
 
 
-    int head = open("./root/CGI-bin/head.html", O_RDONLY);
+    int head = open("./root/myDB/select_login_head.html", O_RDONLY);
     if (head < 0)
     {
         fprintf(stderr, "open error 17\n");
@@ -30,13 +30,14 @@ int main()
 
     char cookie_buf[512] = {0};
     char* cookie = getenv("HTTP_COOKIE");
-    fprintf(stderr, "####%s\n", cookie);
-    sprintf(cookie_buf, "<li class=\"sigi\"><a data-toggle=\"modal\" data-target=\"#myModal4\" >:%s</a>a></li>li>", cookie);
+    sprintf(cookie_buf, "<li class=\"sigi\"><a data-toggle=\"modal\" data-target=\"#myModal4\" >:%s</a></li>", cookie);
     char* file = (char*)malloc(sizeof(char)*SIZE*20);
     read(head, file, SIZE*20);
     printf("%s", file);
     printf("%s", cookie_buf);
-    fseek(tail, strlen(file)+strlen(cookie_buf), SEEK_SET);
+    fseek(tail, strlen(file)+strlen(cookie_buf)+
+          strlen("data-toggle=\"modal\" \
+                 data-target=\"#myModal4\">11111</fcntl>"), SEEK_SET);
     fread(file, SIZE*20, 1, tail);
     printf("%s", file);
     return 0;
