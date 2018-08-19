@@ -1,24 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <mysql.h>
+#include <iostream>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "commit.h"
+#include "../commit.h"
 #define MAX 1024
-
-void Splite(char first_line[], char **output)
-{
-    // 这里为了线程安全问题
-    char* tmp = NULL;
-    char* token = strtok_r(first_line, "&", &tmp);
-    int i = 0;
-    while (token != NULL)
-    {   
-        output[i] = token;
-        ++i;
-        token = strtok_r(NULL, "&", &tmp);                                                                               
-    }   
-}
 
 int hex2dec(char c) {  
     if ('0' <= c && c <= '9') {  
@@ -95,72 +79,62 @@ void decode(char url[])
 
 int main()
 {
-    // 获取数据
     char buf[1024*10] = {0};
     if (GetQueryString(buf) < 0)
     {
         fprintf(stderr, "GetQueryString failed\n");
         return 1;
     }
-    char nickname[50] = {0};
-    char Email[50] = {0};
-    char pass[50] = {0};
-    char md5[50] = {0};
-    char* data[3] = {0};
-    Splite(buf, data);
-    sscanf(data[0], "nickname=%s", nickname);
-    sscanf(data[1], "Email=%s", Email);
-    sscanf(data[2], "pass=%s", pass);
     
-    decode(nickname);
-    int i = 0;
-    for (; i < (int)strlen(Email); ++i)
+    char* cookie = getenv("HTTP_COOKIE");
+    FILE* comment_fd = fopen("./root/myDB/comment/comment_page.html", "w");
+    if (comment_fd == 0)
     {
-        md5[i] = Email[i];
+        fprintf(stderr, "open comment_fd failed\n");
+        return 1;
     }
-    int j = 0;
-    for (; j < (int)strlen(pass); ++j)
+    FILE* head = fopen("./root/myDB/comment/comment_head.html", "a+");
+    if (comment_fd == 0)
     {
-        md5[i] = pass[j];
-        ++i;
+        fprintf(stderr, "open comment_fd failed\n");
+        return 1;
+    }
+    char div_comment[1024*10] = {0};
+    decode(buf+8);
+    sprintf(div_comment, "<h3>%s</h3>\n<div>\n%s\n</div><br>", cookie, buf+8);
+    fwrite(div_comment, strlen(div_comment), 1, head);
+    char c = '\0';
+    fseek(head, 0, SEEK_SET);
+    while (fread(&c, 1, 1, head) > 0)
+    {
+        fwrite(&c, 1, 1, comment_fd);
+    }
+    
+    FILE* tail = fopen("./root/myDB/comment/comment_file.html", "r");
+    if (tail == 0)
+    {
+        fprintf(stderr, "open comment_file failed\n");
+        return 1;
     }
 
-    MYSQL* connect_fd = mysql_init(NULL);
-    if (mysql_real_connect(connect_fd, "127.0.0.1", "root", "", "shanlv", 3306, NULL, 0) == NULL)
+    c = '\0';
+    while (fread(&c, 1, 1, tail) > 0)
     {
-        fprintf(stderr, "mysql_real_connect failed\n");
+        fwrite(&c, 1, 1, comment_fd);
+    }
+    fclose(head);
+    fclose(tail);
+    fclose(comment_fd);
+    int success_page = open("./root/404/comment_success.html", O_RDONLY);
+    if (success_page < 0)
+    {
+        fprintf(stderr, "open success_page failed\n");
         return 1;
     }
-    char sql[1024] = {0};
-    // 已经修改
-    sprintf(sql, "insert into shan values ('%s', '%s', '%s', md5('%s'))", nickname, Email, pass, md5);
-    int ret = mysql_query(connect_fd,sql);
-    if (ret < 0)
+    while (read(success_page, &c, 1) > 0)
     {
-        fprintf(stderr, "mysql_query failed\n");
-        return 1;
+        write(1, &c, 1);
     }
-    fprintf(stderr, "insert success\n");
-    mysql_close(connect_fd);
-    FILE* fd = fopen("./root/404/success.html", "r");
-    if (fd == 0)
-    {
-        fprintf(stderr, "open error\n");
-        return 1;
-    }
-    char c = '\0';
-    struct stat sta;
-    int st = stat("./root/404/success.html", &sta);
-    if (st < 0)
-    {
-        fprintf(stderr, "stat error\n");
-        return 1;
-    }
-    while (fread(&c, 1, sta.st_size, fd) > 0)
-    {
-        fwrite(&c, 1, sta.st_size, stdout);
-    }
-    fclose(fd);
+    close(success_page);
     return 0;
 }
-

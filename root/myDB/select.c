@@ -108,6 +108,9 @@ int main()
             fprintf(stderr, "stat error\n");
             return 1;
         }   
+        char header[256] = {0};
+        sprintf(header, "HTTP/1.1 200 OK\nContent-Length: %lu\n\n", sta.st_size);
+        printf("%s",header);
         while (fread(&c, 1, sta.st_size, fd) > 0)
         {   
             fwrite(&c, 1, sta.st_size, stdout);
