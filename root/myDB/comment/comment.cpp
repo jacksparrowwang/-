@@ -101,7 +101,7 @@ int main()
     }
     char div_comment[1024*10] = {0};
     decode(buf+8);
-    sprintf(div_comment, "<h3>%s</h3>\n<div>\n%s\n</div><br>", cookie, buf+8);
+    sprintf(div_comment, "<h3>%s</h3>\n<div>\n%s\n</div>\n---------------------------------\n<br>", cookie, buf+8);
     fwrite(div_comment, strlen(div_comment), 1, head);
     char c = '\0';
     fseek(head, 0, SEEK_SET);

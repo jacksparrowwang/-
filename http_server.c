@@ -150,7 +150,7 @@ int FatherProcess(int sock, FirstLine* first, Header* header, int father_read, i
     // 在管道中，当所有的写端关闭，这时候就会读到EOF
     // 所以要进行fork后要进行关闭没用的文件描述符
     wait(NULL);
-    char *buffer = (char*)malloc(sizeof(char) * SIZE * 30);
+    char *buffer = (char*)malloc(sizeof(char) * SIZE * 50);
     size_t count = 0;
     // 从子进程中读取响应的body
     char c = '\0';
