@@ -1,5 +1,5 @@
 server:http_server.c
-	gcc -o $@ $^ -pthread -g
+	gcc -o $@ $^ -pthread
 
 .PHONY:clean
 

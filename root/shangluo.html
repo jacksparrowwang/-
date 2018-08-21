@@ -160,7 +160,7 @@
 												</ul>
 											</div>
 											<div class="login-right">
-												<form action="/myDB/insert" method="GET">
+												<form action="/myDB/insert" method="POST">
 												<fieldset>
 													<h3>注册 </h3>
                                                     <input type="text" name="nickname" placeholder="昵称" pattern="^[\u4e00-\u9fa5]{1,7}$|^[\dA-Za-z_]{1,14}$" title="昵称不能超过8个汉字或者14个字母">
@@ -201,7 +201,7 @@
 											</div>
 								<div class="login-right">
 										<h3>登陆 </h3>
-										<form action="/myDB/select" method="GET">
+										<form action="/myDB/select" method="POST">
 										<fieldset>
                                             <input type="text" name="Email" placeholder="iphone number" pattern="^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$" title="输入手机号不正确">	
                                             <input type="password" name="pass" placeholder="Password" title="密码不合法">	
