@@ -87,6 +87,12 @@ int main()
     }
     
     char* cookie = getenv("HTTP_COOKIE");
+    if (cookie == NULL)
+    {
+        printf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"></head>\
+               <body><h3>请先登陆</h3></body></html>");
+        return 1;
+    }
     FILE* comment_fd = fopen("./root/myDB/comment/comment_page.html", "w");
     if (comment_fd == 0)
     {
