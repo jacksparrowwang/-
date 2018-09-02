@@ -157,6 +157,8 @@ int main()
     free(tmp_buf);
 
     mysql_close(connect_fd);
+    close(head);
+    close(mid);
     return 0;
 }
 

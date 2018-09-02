@@ -39,5 +39,7 @@ int main()
     fseek(tail, strlen(file)+strlen(cookie_buf), SEEK_SET);
     fread(file, SIZE*20, 1, tail);
     printf("%s", file);
+    close(head);
+    fclose(tail);
     return 0;
 }

@@ -31,5 +31,6 @@ int main()
         printf("%s", buf_tmp);
     }
     printf("</div></body></html>");
+    close(minute_fd);
     return 0;
 }

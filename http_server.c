@@ -112,18 +112,21 @@ void FilePath(char* url_path, char* file_path)
 int StaticPage(int sock, FirstLine* first)
 {
     char file_path[SIZE] = {0};
+    // 拼接路径
     FilePath(first->url_path, file_path);
-    long long size = FileSize(file_path);
-    if (size == -1)
-    {
-        Error404(sock);
-        return -1;
-    }
+    // 打开文件
     int fd = open(file_path, O_RDONLY);
     if (fd < 0)
     {
         Error404(sock);
         perror("open error");
+        return -1;
+    }
+    long long size = FileSize(file_path);
+    if (size == -1)
+    {
+        Error404(sock);
+        close(sock);
         return -1;
     }
     char response[SIZE] = {0};
@@ -317,6 +320,7 @@ void Error404(int sock)
     if (fd < 0)
     {
         perror("open 404");
+        close(sock);
         return;
     }
     struct stat st;
@@ -324,6 +328,8 @@ void Error404(int sock)
     if (sta < 0)
     {
         perror("stat error318");
+        close(sock);
+        close(fd);
         return;
     }
     sprintf(buf, "HTTP/1.1 404 Not Found\nContent-Length: %lu\n\n", st.st_size);
@@ -350,6 +356,10 @@ void Splite(char first_line[], char **output)
 
 void GetUrlPathQuer(char* url, FirstLine* first)
 {
+    time_t t = time(NULL);
+    int chuo = time(&t);
+    // 打印日志
+    fprintf(stderr, "url # %s ## data # %d\n",url, chuo);
     int i = 0;
     for (; i < (int)strlen(url); ++i)
     {
@@ -378,6 +388,10 @@ int GetMethodUrlVer(FirstLine* first, char first_line[])
     Splite(first_line, buf);
     first->method = buf[0];
     first->version = buf[2];
+    if (buf[1] == NULL)
+    {
+        return -1;
+    }
     GetUrlPathQuer(buf[1], first);
     return 0;
 }
@@ -427,6 +441,7 @@ void Requeset(int sock) // start
     {
         if (ret == -2)
         {
+            close(sock);
             return;
         }
         // 这里要注意是404页面处理
@@ -434,7 +449,9 @@ void Requeset(int sock) // start
         perror("GetFirstLine error\n");
         return;
     }
-
+    // 此处为了打印日志
+    fprintf(stderr, "FirstLine # %s\n", first_line);
+    // 首行处理
     ret = GetMethodUrlVer(&first, first_line);
     if (ret < 0)
     {
@@ -459,6 +476,8 @@ void Requeset(int sock) // start
         total += strlen(buf);
     }
 
+    // 此处是打印日志
+    fprintf(stderr, "header # %s\n", header.header);
     // 处理header
     ret = ParseHeader(&first, &header);
     if (ret < 0)
