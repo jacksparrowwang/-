@@ -130,7 +130,32 @@ int StaticPage(int sock, FirstLine* first)
         return -1;
     }
     char response[SIZE] = {0};
-    sprintf(response, "HTTP/1.1 200 OK\nConten-Length: %llu\n\n", size);
+    int len = strlen(file_path) - 1;
+    int fg = 0;
+    while (len)
+    {
+        if (file_path[len] == '.')
+        {
+            fg = 1;
+            break;
+        }
+        --len;
+    }
+    if (fg == 1)
+    {
+        if (strcasecmp(file_path+len, ".html") == 0)
+        {
+            sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %llu\nContent-Type: text/html\n\n", size);
+        }
+        else
+        {
+            sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %llu\n\n", size);
+        }
+    }
+    else
+    {
+        sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %llu\n\n", size);
+    }
     send(sock, response, strlen(response), 0);
     sendfile(sock, fd, NULL, size);
     close(fd);
